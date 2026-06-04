@@ -1,39 +1,20 @@
 import os
 import requests
+import subprocess
 from telegram import Update
 from telegram.ext import Application, MessageHandler, ContextTypes, filters
-from moviepy.editor import ImageClip, concatenate_videoclips
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-def get_images(url):
-    # مؤقتًا (هنعدلها بعدين لاستخراج تيك توك)
-    return []
-
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    url = update.message.text
+    url = update.message.text.strip()
+    await update.message.reply_text("جاري المعالجة...")
 
-    images = get_images(url)
+async def main():
+    app = Application.builder().token(BOT_TOKEN).build()
+    app.add_handler(MessageHandler(filters.TEXT, handle))
+    await app.run_polling()
 
-    if not images:
-        await update.message.reply_text("مش قادر أجيب الصور من اللينك دلوقتي.")
-        return
-
-    paths = []
-    for i, img in enumerate(images):
-        path = f"{i}.jpg"
-        r = requests.get(img)
-        open(path, "wb").write(r.content)
-        paths.append(path)
-
-    clips = [ImageClip(p).set_duration(2) for p in paths]
-    video = concatenate_videoclips(clips)
-
-    out = "out.mp4"
-    video.write_videofile(out, fps=24)
-
-    await update.message.reply_video(video=open(out, "rb"))
-
-app = Application.builder().token(BOT_TOKEN).build()
-app.add_handler(MessageHandler(filters.TEXT, handle))
-app.run_polling()
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())
