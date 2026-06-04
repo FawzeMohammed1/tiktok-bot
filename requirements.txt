@@ -1,2 +1,6 @@
 python-telegram-bot==21.3
 requests
+Pillow
+yt-dlp
+opencv-python-headless
+numpy
